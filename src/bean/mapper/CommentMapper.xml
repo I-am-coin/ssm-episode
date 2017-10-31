@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="bean.mapper.CommentMapper">
+	<!-- 查询指定id的评论信息 -->
+	<select id="getCommentsByEpisodeId" resultType="bean.pojo.Comment">
+		select * from episode.t_comment
+		where episode_id = #{episode_id}
+		order by episode_id desc
+	</select>
+	<!-- 增加评论点赞数 -->
+	<update id="addGoodCommentById">
+		update episode.t_comment
+		set comment_good = (
+			select comment_good+1 from episode.t_comment
+			where comment_id = #{comment_id}
+		)
+		where comment_id = #{comment_id}
+	</update>
+	<!-- 点赞段子表插入一条数据 -->
+	<insert id="insertGoodComment">
+		insert into episode.t_good_comment (
+			comment_id,
+			user_id
+		)
+		values (
+			#{0},
+			#{1}
+		)
+	</insert>
+	<!-- 查询指定用户id和评论id的点赞评论数据 -->
+	<select id="getGoodComment" resultType="int">
+		select count(*) from episode.t_good_comment
+		where comment_id = #{0} and user_id = #{1}	
+	</select>
+	
+	<!-- 新增评论 -->
+	<insert id="insertComment">
+		<selectKey keyProperty="comment_id" order="BEFORE" resultType="String">
+			select episode.s_episode_comment_id.nextval from dual
+		</selectKey>
+		insert into episode.t_comment(
+			comment_id,
+			comment_content,
+			comment_good,
+			user_id,
+			episode_id
+		)
+		values (
+			#{comment_id},
+			#{0},
+			0,
+			#{1},
+			#{2}
+		)
+	</insert>
+	<!-- 查询最新评论编号 -->
+	<select id="getNewCommentId" resultType="String">
+		select episode.s_episode_comment_id.currval from dual
+	</select>
+	<!-- 删除评论 -->
+	<delete id="deleteComment">
+		delete from episode.t_comment
+		where comment_id = #{comment_id}
+	</delete>
+</mapper>

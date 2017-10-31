@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="bean.mapper.UserMapper">
+	<!-- 查询指定id的用户信息 -->
+	<select id="getUserById" resultType="bean.pojo.User">
+		select * from episode.t_user
+		where user_id = #{user_id}
+	</select>
+	<!-- 修改用户login_time -->
+	<update id="updateLoginTimeByUserId">
+		update episode.t_user
+		set login_time = sysdate
+		where user_id = #{user_id}
+	</update>
+	
+	<!-- 通过自定义序列插入用户信息 -->
+	<insert id="insertUser">
+		insert into episode.t_user
+		(
+			user_id,
+			user_nickname,
+			user_password,
+			user_image,
+			user_gender,
+			login_time
+		)
+		values
+		(
+			#{0},
+			#{1},
+			#{2},
+			'icon.png',
+			1,
+			sysdate
+		)
+	</insert>
+	<!-- 查询预新增用户id -->
+	<select id="getNewUserId" resultType="int">
+		select episode.S_EPISODE_USER_ID.NEXTVAL from dual
+	</select>
+	
+	<!-- 修改用户信息 -->
+	<!-- 修改用户昵称 -->
+	<update id="updateNicknameByUserId">
+		update episode.t_user
+		set user_nickname = #{1}
+		where user_id = #{0}
+	</update>
+	<!-- 修改用户性别 -->
+	<update id="updateGenderByUserId">
+		update episode.t_user
+		set user_gender = #{1}
+		where user_id = #{0}
+	</update>
+	<!-- 修改用户密码 -->
+	<update id="updatePasswordByUserId">
+		update episode.t_user
+		set user_password = #{1}
+		where user_id = #{0}
+	</update>
+	<!-- 修改用户头像 -->
+	<update id="updateImageByUserId">
+		update episode.t_user
+		set user_image = #{1}
+		where user_id = #{0}
+	</update>
+	
+	<!-- 删除指定时间未登录的用户 -->
+	<delete id="deleteUser">
+		delete from episode.t_user
+		where login_time &lt; to_date(#{login_time}, 'YYYYMMDD')
+	</delete>
+</mapper>

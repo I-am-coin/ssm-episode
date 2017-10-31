@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="bean.mapper.EpisodeMapper">
+	<!-- 查询所有段子 -->
+	<select id="getEpisodes" resultType="bean.pojo.Episode">
+		select * from episode.t_episode
+		order by add_time desc, episode_id
+	</select>
+	<!-- 通过episode_id查询单个段子 -->
+	<select id="getEpisodeById" resultType="bean.pojo.Episode">
+		select * from episode.t_episode
+		where episode_id = #{episode_id}
+	</select>
+	<!-- 通过user_id查询段子信息 -->
+	<select id="getEpisodeByUserId" resultType="bean.pojo.Episode">
+		select * from episode.t_episode
+		where episode_id in (
+			select episode_id from episode.t_collect
+			where user_id = #{user_id}
+		)
+	</select>
+	
+	<!-- 增加段子点赞数 -->
+	<update id="addEpisodeGoodById">
+		update episode.t_episode
+		set episode_good = (
+			select episode_good+1 from episode.t_episode
+			where episode_id = #{episode_id}
+		)
+		where episode_id = #{episode_id}
+	</update>
+	<!-- 插入到段子点赞表 -->
+	<insert id="insertEpisode_Good">
+		insert into episode.t_good_episode(user_id, episode_id)
+		values (#{0}, #{1})
+	</insert>
+	
+	<!-- 查询点赞段子表中是否有数据 -->
+	<select id="getGoodEpisode" resultType="int">
+		select count(*) from episode.t_good_episode
+		where episode_id = #{0} and user_id  = #{1}
+	</select>
+	<!-- 查询收藏信息 -->
+	<select id="getCollect" resultType="int">
+		select count(*) from episode.t_collect
+		where episode_id = #{0} and user_id = #{1}
+	</select>
+	
+	<!-- 插入收藏段子 -->
+	<insert id="insertCollectEpisode">
+		insert into episode.t_collect (
+			user_id,
+			episode_id
+		)
+		values (
+			#{0},
+			#{1}
+		)
+	</insert>
+	<!-- 删除收藏记录 -->
+	<delete id="deleteCollectEpisode">
+		delete from episode.t_collect
+		where user_id = #{0} and episode_id = #{1}
+	</delete>
+	
+	<!-- 删除指定时间之前的段子 -->
+	<delete id="deleteEpisode">
+		delete from episode.t_episode
+		where add_time &lt; to_date(#{add_time}, 'YYYYMMDD')
+	</delete>
+	<!-- 新增段子 -->
+	<insert id="insertEpisode">
+		insert into episode.t_episode ( episode_content )
+		values ( #{episode_content} )
+	</insert>
+</mapper>
